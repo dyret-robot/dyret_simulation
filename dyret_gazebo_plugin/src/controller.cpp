@@ -294,27 +294,28 @@ namespace dyret {
 			const auto& cfg = conf.prismatic;
 			for(size_t i = 0; i < cfg.ids.size(); ++i) {
 				const auto id = cfg.ids[i];
-				if(id > 12) {
+				if(id > 8) {
 					// There is an error in the message, return to user
 					ROS_WARN("Invalid Prismatic ID (=%d) encountered", id);
 					resp.status = dyret_common::Configure::Response::STATUS_PARAMETER;
 					resp.message = "Invalid Prismatic ID encountered";
 					return true;
 				}
-				auto name = JOINT_NAMES[id];
+				auto name = EXT_NAMES[id];
 				auto joint = joints[name];
 				switch(cfg.type) {
-					case dyret_common::PrismaticConfig::TYPE_SET_P:
-						if(cfg.parameters.size() < cfg.ids.size() * 1) {
-							ROS_WARN("Expected one parameter for each ID (%zu) found %zu",
-									cfg.ids.size() * 1, cfg.parameters.size());
+					case dyret_common::PrismaticConfig::TYPE_SET_PID:
+						if(cfg.parameters.size() < cfg.ids.size() * 3) {
+							ROS_WARN("Expected three parameter for each ID (%zu) found %zu",
+									cfg.ids.size() * 3, cfg.parameters.size());
 							resp.status = dyret_common::Configure::Response::STATUS_PARAMETER;
-							resp.message = "Expected at least one parameter per ID to set P";
+							resp.message = "Expected at least three parameter per ID to set PID";
 							return true;
 						} else {
 							gazebo::common::PID pid(
-									cfg.parameters[id],
-									0.0, 0.0);
+									cfg.parameters[i + 0],
+									cfg.parameters[i + 1],
+									cfg.parameters[i + 2]);
 							ctrl->SetPositionPID(name, pid);
 						}
 						break;
