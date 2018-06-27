@@ -406,6 +406,7 @@ namespace dyret {
 				// match up.
 				state.revolute[i].current   = std::abs(joint->GetForce(0));
 				state.revolute[i].set_point = set_point;
+				state.revolute[i].error = state.revolute[i].position - state.revolute[i].set_point;
 			}
 			for(int i = 0; i < 8; ++i) {
 				auto joint     = joints[EXT_NAMES[i]];
@@ -419,6 +420,7 @@ namespace dyret {
 #endif
 				state.prismatic[i].position  = std::abs(position * 1000.0);
 				state.prismatic[i].set_point = std::abs(set_point * 1000.0);
+				state.prismatic[i].error = state.prismatic[i].position - state.prismatic[i].set_point;
 			}
 			state_pub.publish(state);
 			lastPublish = currentTime;
