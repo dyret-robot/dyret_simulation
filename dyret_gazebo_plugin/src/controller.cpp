@@ -250,8 +250,7 @@ namespace dyret {
 					resp.message = "Invalid Revolute ID encountered";
 					return true;
 				}
-				auto name = JOINT_NAMES[id];
-				auto joint = joints[name];
+				const auto& name = JOINT_NAMES[id];
 				switch(cfg.type) {
 					case dyret_common::RevoluteConfig::TYPE_ENABLE_TORQUE:
 					case dyret_common::RevoluteConfig::TYPE_DISABLE_TORQUE:
@@ -265,7 +264,7 @@ namespace dyret {
 							resp.message = "Expected one parameter for each ID to set speed";
 							return true;
 						} else {
-							joint->SetVelocityLimit(0, cfg.parameters[i]);
+							joints[name]->SetVelocityLimit(0, cfg.parameters[i]);
 						}
 						break;
 					case dyret_common::RevoluteConfig::TYPE_SET_PID:
@@ -277,9 +276,9 @@ namespace dyret {
 							return true;
 						} else {
 							gazebo::common::PID pid(
-									cfg.parameters[i + 0],
-									cfg.parameters[i + 1],
-									cfg.parameters[i + 2]);
+									cfg.parameters[i * 3 + 0],
+									cfg.parameters[i * 3 + 1],
+									cfg.parameters[i * 3 + 2]);
 							ctrl->SetPositionPID(name, pid);
 						}
 						break;
@@ -301,8 +300,7 @@ namespace dyret {
 					resp.message = "Invalid Prismatic ID encountered";
 					return true;
 				}
-				auto name = EXT_NAMES[id];
-				auto joint = joints[name];
+				const auto& name = EXT_NAMES[id];
 				switch(cfg.type) {
 					case dyret_common::PrismaticConfig::TYPE_SET_PID:
 						if(cfg.parameters.size() < cfg.ids.size() * 3) {
@@ -313,9 +311,9 @@ namespace dyret {
 							return true;
 						} else {
 							gazebo::common::PID pid(
-									cfg.parameters[i + 0],
-									cfg.parameters[i + 1],
-									cfg.parameters[i + 2]);
+									cfg.parameters[i * 3 + 0],
+									cfg.parameters[i * 3 + 1],
+									cfg.parameters[i * 3 + 2]);
 							ctrl->SetPositionPID(name, pid);
 						}
 						break;
