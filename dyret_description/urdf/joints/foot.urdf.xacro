@@ -3,6 +3,10 @@
 	<xacro:include filename="$(find dyret_description)/urdf/inertias.urdf.xacro" />
 
 	<xacro:macro name="foot" params="name">
+		<!-- The foot cylinder should always be included
+		     since the collision it represents is a stand-in
+		     for the larger 3D printed part below the extension
+		     leg (NOTE: it is a bit smaller, but should be large enough)-->
 		<link name="${name}_foot_cyl">
 			<collision>
 				<geometry>
@@ -13,40 +17,124 @@
 			<xacro:cylinder_inertia mass="0.007" height="0.0355"
 				radius="0.014"/>
 		</link>
-		<link name="${name}_foot_sph">
-			<visual>
-				<geometry>
-					<sphere radius="0.0142" />
-				</geometry>
-			</visual>
+		<!-- Note that the foot cylinder is 3D printed and quite
+		     slippery, small values here should aid in avoiding
+		     behavior utilizing the cylinder to walk -->
+		<gazebo reference="${name}_foot_cyl">
+			<mu1>0.7</mu1>
+			<mu2>0.7</mu2>
+			<kp>100000.0</kp>
+			<kd>1.0</kd>
+			<maxVel>0.001</maxVel>
+			<minDepth>0.001</minDepth>
+		</gazebo>
 
-			<collision>
-				<geometry>
-					<sphere radius="0.0142" />
-				</geometry>
-			</collision>
+		<!-- If contact is not enabled we model the foot as a simple sphere
+		     with high friction parameters -->
+		<xacro:unless value="$(arg contact_enabled)">
+			<link name="${name}_foot_sph">
+				<visual>
+					<geometry>
+						<sphere radius="0.0142" />
+					</geometry>
+				</visual>
 
-			<xacro:box_inertia mass="0.018" height="0.0142"
-				width="0.0142" length="0.0142" />
-		</link>
-		<joint name="${name}_foot_fixed" type="fixed">
-			<parent link="${name}_foot_cyl" />
-			<child link="${name}_foot_sph" />
-			<origin xyz="0 0 ${-0.0355/2 + 0.00195}" />
-		</joint>
+				<collision>
+					<geometry>
+						<sphere radius="0.0142" />
+					</geometry>
+				</collision>
 
-		<xacro:if value="$(arg contact_enabled)">
+				<xacro:box_inertia mass="0.018" height="0.0142"
+					width="0.0142" length="0.0142" />
+			</link>
+			<joint name="${name}_foot_fixed" type="fixed">
+				<parent link="${name}_foot_cyl" />
+				<child link="${name}_foot_sph" />
+				<origin xyz="0 0 ${-0.0355/2 + 0.00195}" />
+			</joint>
+
 			<gazebo reference="${name}_foot_sph">
-				<kp>1000000.0</kp>
-				<kd>100.0</kd>
+				<!-- 1.5 is very high friction -->
 				<mu1>1.5</mu1>
 				<mu2>1.5</mu2>
-				<maxVel>1.0</maxVel>
-				<minDepth>0.0</minDepth>
+				<kp>100000.0</kp>
+				<kd>1.0</kd>
+				<maxVel>0.001</maxVel>
+				<minDepth>0.001</minDepth>
+			</gazebo>
+		</xacro:unless>
+
+		<!-- The contact sensor is a bit smaller than the regular foot
+		     so we build it a bit down to avoid simulation being able
+		     to extend it sensor range -->
+		<xacro:if value="$(arg contact_enabled)">
+			<!-- Smaller cylinder: -->
+			<link name="${name}_foot_cyl2">
+				<collision>
+					<geometry>
+						<cylinder radius="0.011" length="0.0126" />
+					</geometry>
+				</collision>
+				<visual>
+					<geometry>
+						<cylinder radius="0.011" length="0.0126" />
+					</geometry>
+				</visual>
+
+				<xacro:cylinder_inertia mass="0.009" height="0.0126"
+					radius="0.011"/>
+			</link>
+			<gazebo reference="${name}_foot_cyl2">
+				<mu1>0.5</mu1>
+				<mu2>0.5</mu2>
+				<kp>100000.0</kp>
+				<kd>1.0</kd>
+				<fdir1> 0.0 0.0 0.0 </fdir1>
+				<maxVel>0.001</maxVel>
+				<minDepth>0.001</minDepth>
+			</gazebo>
+			<joint name="${name}_foot_cyl_fixed" type="fixed">
+				<parent link="${name}_foot_cyl" />
+				<child link="${name}_foot_cyl2" />
+				<origin xyz="0 0 ${-0.0355/2 - 0.0126/2}" />
+			</joint>
+
+			<!-- Smaller sphere with sensor: -->
+			<link name="${name}_foot_sph">
+				<visual>
+					<geometry>
+						<sphere radius="0.01" />
+					</geometry>
+				</visual>
+
+				<collision>
+					<geometry>
+						<sphere radius="0.01" />
+					</geometry>
+				</collision>
+
+				<xacro:box_inertia mass="0.009" height="0.00975"
+					width="0.00975" length="0.00975" />
+			</link>
+			<joint name="${name}_foot_fixed" type="fixed">
+				<parent link="${name}_foot_cyl2" />
+				<child link="${name}_foot_sph" />
+				<origin xyz="0 0 ${-0.00975/2 - 0.0126/2 + 0.0101/2}" />
+			</joint>
+
+			<gazebo reference="${name}_foot_sph">
+				<mu1>0.5</mu1>
+				<mu2>0.5</mu2>
+				<kp>100000.0</kp>
+				<kd>1.0</kd>
+				<fdir1> 0.0 0.0 0.0 </fdir1>
+				<maxVel>0.001</maxVel>
+				<minDepth>0.001</minDepth>
 				<material>Gazebo/Black</material>
 				<sensor name="${name}_bumper" type="contact">
 					<contact>
-						<collision>${name}_ext1_outer_fixed_joint_lump__${name}_foot_sph_collision_2</collision>
+						<collision>${name}_ext1_outer_fixed_joint_lump__${name}_foot_sph_collision_3</collision>
 					</contact>
 					<plugin name="${name}_gazebo_ros_bumper_controller"
 						filename="libgazebo_ros_bumper.so">
@@ -58,22 +146,6 @@
 			</gazebo>
 		</xacro:if>
 		<xacro:unless value="$(arg contact_enabled)">
-			<gazebo reference="${name}_foot_sph">
-				<kp>1000000.0</kp>
-				<kd>100.0</kd>
-				<mu1>1.5</mu1>
-				<mu2>1.5</mu2>
-				<maxVel>1.0</maxVel>
-				<minDepth>0.0</minDepth>
-			</gazebo>
 		</xacro:unless>
-		<gazebo reference="${name}_foot_cyl">
-			<kp>1000000.0</kp>
-			<kd>100.0</kd>
-			<mu1>1.5</mu1>
-			<mu2>1.5</mu2>
-			<maxVel>1.0</maxVel>
-			<minDepth>0.0</minDepth>
-		</gazebo>
 	</xacro:macro>
 </robot>
