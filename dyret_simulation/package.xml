@@ -1,6 +1,6 @@
 <package format="2">
 	<name>dyret_simulation</name>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<description>Metapackage for DyRET simulatior integration</description>
 	<maintainer email="jorgehn@ifi.uio.no">Jørgen Nordmoen</maintainer>
 	<license>GPL-3.0-or-later</license>
