@@ -127,14 +127,12 @@
 			<child link="${name}_servo" />
 			<limit
 				lower="-1.57" upper="1.57"
-				effort="10.0" velocity="5.76" />
-			<dynamics friction="0.1" damping="0.0952" />
+				effort="30.0" velocity="5.76" />
+			<!--<dynamics friction="0.1" damping="0.0952" />-->
+			<dynamics friction="0.3" damping="3.0" />
 		</joint>
 		<gazebo reference="${name}">
 			<implicitSpringDamper>1</implicitSpringDamper>
-			<stopKd value="100000000.0" />
-			<stopKp value="100000000.0" />
-			<fudgeFactor value="0.5" />
 		</gazebo>
 	</xacro:macro>
 
@@ -147,14 +145,12 @@
 			<origin xyz="0.002 0 0.0145" rpy="0 0 ${pi/2}" />
 			<limit
 				lower="-1.57" upper="1.57"
-				effort="10.0" velocity="5.76" />
-			<dynamics friction="0.1" damping="0.0952" />
+				effort="30.0" velocity="5.76" />
+			<!--<dynamics friction="0.1" damping="0.0952" />-->
+			<dynamics friction="0.3" damping="3.0" />
 		</joint>
 		<gazebo reference="${name}">
 			<implicitSpringDamper>1</implicitSpringDamper>
-			<stopKd value="100000000.0" />
-			<stopKp value="100000000.0" />
-			<fudgeFactor value="0.5" />
 		</gazebo>
 	</xacro:macro>
 </robot>

@@ -6,7 +6,8 @@
 	<arg name="posed" default="true" doc="Should initial spawn be posed?" />
 	<arg name="pose" default="$(find dyret_gazebo)/cfg/default_pose.yaml"
 		doc="YAML configuration laying out default pose" />
-	<arg name="spawn_height" default="0.46" doc="Height of dyret when spawned" />
+	<arg unless="$(arg contact_enabled)" name="spawn_height" default="0.46" doc="Height of dyret when spawned" />
+	<arg if="$(arg contact_enabled)" name="spawn_height" default="0.468" doc="Height of dyret when spawned" />
 
 	<!-- If posed is set we load default pose parameters into ROS -->
 	<rosparam if="$(arg posed)" command="load" file="$(arg pose)" />

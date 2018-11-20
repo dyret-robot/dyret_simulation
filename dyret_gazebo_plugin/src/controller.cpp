@@ -250,8 +250,7 @@ namespace dyret {
 					resp.message = "Invalid Revolute ID encountered";
 					return true;
 				}
-				auto name = JOINT_NAMES[id];
-				auto joint = joints[name];
+				const auto& name = JOINT_NAMES[id];
 				switch(cfg.type) {
 					case dyret_common::RevoluteConfig::TYPE_ENABLE_TORQUE:
 					case dyret_common::RevoluteConfig::TYPE_DISABLE_TORQUE:
@@ -265,7 +264,7 @@ namespace dyret {
 							resp.message = "Expected one parameter for each ID to set speed";
 							return true;
 						} else {
-							joint->SetVelocityLimit(0, cfg.parameters[i]);
+							joints[name]->SetVelocityLimit(0, cfg.parameters[i]);
 						}
 						break;
 					case dyret_common::RevoluteConfig::TYPE_SET_PID:
@@ -277,9 +276,9 @@ namespace dyret {
 							return true;
 						} else {
 							gazebo::common::PID pid(
-									cfg.parameters[i + 0],
-									cfg.parameters[i + 1],
-									cfg.parameters[i + 2]);
+									cfg.parameters[i * 3 + 0],
+									cfg.parameters[i * 3 + 1],
+									cfg.parameters[i * 3 + 2]);
 							ctrl->SetPositionPID(name, pid);
 						}
 						break;
@@ -294,27 +293,27 @@ namespace dyret {
 			const auto& cfg = conf.prismatic;
 			for(size_t i = 0; i < cfg.ids.size(); ++i) {
 				const auto id = cfg.ids[i];
-				if(id > 12) {
+				if(id > 8) {
 					// There is an error in the message, return to user
 					ROS_WARN("Invalid Prismatic ID (=%d) encountered", id);
 					resp.status = dyret_common::Configure::Response::STATUS_PARAMETER;
 					resp.message = "Invalid Prismatic ID encountered";
 					return true;
 				}
-				auto name = JOINT_NAMES[id];
-				auto joint = joints[name];
+				const auto& name = EXT_NAMES[id];
 				switch(cfg.type) {
-					case dyret_common::PrismaticConfig::TYPE_SET_P:
-						if(cfg.parameters.size() < cfg.ids.size() * 1) {
-							ROS_WARN("Expected one parameter for each ID (%zu) found %zu",
-									cfg.ids.size() * 1, cfg.parameters.size());
+					case dyret_common::PrismaticConfig::TYPE_SET_PID:
+						if(cfg.parameters.size() < cfg.ids.size() * 3) {
+							ROS_WARN("Expected three parameter for each ID (%zu) found %zu",
+									cfg.ids.size() * 3, cfg.parameters.size());
 							resp.status = dyret_common::Configure::Response::STATUS_PARAMETER;
-							resp.message = "Expected at least one parameter per ID to set P";
+							resp.message = "Expected at least three parameter per ID to set PID";
 							return true;
 						} else {
 							gazebo::common::PID pid(
-									cfg.parameters[id],
-									0.0, 0.0);
+									cfg.parameters[i * 3 + 0],
+									cfg.parameters[i * 3 + 1],
+									cfg.parameters[i * 3 + 2]);
 							ctrl->SetPositionPID(name, pid);
 						}
 						break;
@@ -406,6 +405,7 @@ namespace dyret {
 				// match up.
 				state.revolute[i].current   = std::abs(joint->GetForce(0));
 				state.revolute[i].set_point = set_point;
+				state.revolute[i].error = state.revolute[i].position - state.revolute[i].set_point;
 			}
 			for(int i = 0; i < 8; ++i) {
 				auto joint     = joints[EXT_NAMES[i]];
@@ -419,6 +419,7 @@ namespace dyret {
 #endif
 				state.prismatic[i].position  = std::abs(position * 1000.0);
 				state.prismatic[i].set_point = std::abs(set_point * 1000.0);
+				state.prismatic[i].error = state.prismatic[i].position - state.prismatic[i].set_point;
 			}
 			state_pub.publish(state);
 			lastPublish = currentTime;
