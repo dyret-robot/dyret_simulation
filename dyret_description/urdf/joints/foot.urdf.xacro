@@ -86,13 +86,13 @@
 					radius="0.011"/>
 			</link>
 			<gazebo reference="${name}_foot_cyl2">
-				<mu1>0.5</mu1>
-				<mu2>0.5</mu2>
+				<mu1>0.7</mu1>
+				<mu2>0.7</mu2>
 				<kp>100000.0</kp>
 				<kd>1.0</kd>
 				<fdir1> 0.0 0.0 0.0 </fdir1>
 				<maxVel>0.001</maxVel>
-				<minDepth>0.001</minDepth>
+				<minDepth>0.000</minDepth>
 			</gazebo>
 			<joint name="${name}_foot_cyl_fixed" type="fixed">
 				<parent link="${name}_foot_cyl" />
@@ -120,17 +120,17 @@
 			<joint name="${name}_foot_fixed" type="fixed">
 				<parent link="${name}_foot_cyl2" />
 				<child link="${name}_foot_sph" />
-				<origin xyz="0 0 ${-0.00975/2 - 0.0126/2 + 0.0101/2}" />
+				<origin xyz="0 0 -0.0063" />
 			</joint>
 
 			<gazebo reference="${name}_foot_sph">
-				<mu1>0.5</mu1>
-				<mu2>0.5</mu2>
+				<mu1>0.7</mu1>
+				<mu2>0.7</mu2>
 				<kp>100000.0</kp>
 				<kd>1.0</kd>
 				<fdir1> 0.0 0.0 0.0 </fdir1>
 				<maxVel>0.001</maxVel>
-				<minDepth>0.001</minDepth>
+				<minDepth>0.000</minDepth>
 				<material>Gazebo/Black</material>
 				<sensor name="${name}_bumper" type="contact">
 					<contact>
