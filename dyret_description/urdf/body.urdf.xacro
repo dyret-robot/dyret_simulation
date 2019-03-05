@@ -30,6 +30,29 @@
 		</link>
 	</xacro:macro>
 
+	<!-- USB hub -->
+	<xacro:property name="hub_width" value="0.138" />
+	<xacro:property name="hub_depth" value="0.024" />
+	<xacro:property name="hub_height" value="0.031" />
+	<xacro:macro name="usb_hub" params="name">
+		<link name="${name}">
+			<visual>
+				<origin xyz="0 0 ${hub_height / 2}" />
+				<geometry>
+					<box size="${hub_width} ${hub_depth} ${hub_height}" />
+				</geometry>
+			</visual>
+			<collision>
+				<origin xyz="0 0 ${hub_height/2}" />
+				<geometry>
+					<box size="${hub_width} ${hub_depth} ${hub_height}" />
+				</geometry>
+			</collision>
+			<xacro:box_inertia mass="0.020" width="${hub_width}"
+				length="${hub_depth}" height="${hub_height}" />
+		</link>
+	</xacro:macro>
+
 	<xacro:property name="ac_width" value="0.056" />
 	<xacro:property name="ac_depth" value="0.098" />
 	<xacro:property name="ac_height" value="0.015" />
@@ -57,9 +80,15 @@
 	<!-- Exported macros: -->
 	<xacro:macro name="body" params="name">
 		<xacro:chassis name="${name}_chassis" />
+		<xacro:usb_hub name="${name}_hub" />
 		<xacro:actuator_board name="${name}_board" />
 		<xacro:imu />
 
+		<joint name="${name}_chassis_hub_joint" type="fixed">
+			<parent link="${name}_chassis" />
+			<child link="${name}_hub" />
+			<origin xyz="0 ${-body_depth / 2.0 + hub_depth / 2.0} ${-body_height - 0.016}" />
+		</joint>
 		<joint name="${name}_chassis_ac_joint" type="fixed">
 			<parent link="${name}_chassis" />
 			<child link="${name}_board" />
