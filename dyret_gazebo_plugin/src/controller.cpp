@@ -78,7 +78,7 @@ namespace dyret {
 			bool set_default = true;
 			while(pid != nullptr) {
 				const auto value = pid->Get<ignition::math::Vector3d>();
-				const auto pid_value = gazebo::common::PID(value[0], value[1], value[2]);
+				const auto pid_value = gazebo::common::PID(value[0], value[1], value[2], value[1], -value[1]);
 				if(pid->HasAttribute("type")) {
 					auto attr = pid->GetAttribute("type")->GetAsString();
 					if(attr == "mx64") {
